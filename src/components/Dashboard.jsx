@@ -189,7 +189,7 @@ export default function Dashboard({ session }) {
   const exportCSV = (logs) => {
     if (!logs?.length) return alert("No logs to export");
 
-    const headers = ["Name", "Study Year", "Date", "Description"];
+    const headers = ["Name", "Study Year", "Date", "Work Done"];
 
     const rows = logs.map((l) => [
       l.user_name || l.profiles?.full_name || "",
@@ -207,7 +207,7 @@ export default function Dashboard({ session }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "club_logs.csv";
+    a.download = "chaya_logs.csv";
     a.click();
     URL.revokeObjectURL(url);
   };
