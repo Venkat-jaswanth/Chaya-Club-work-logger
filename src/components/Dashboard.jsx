@@ -161,7 +161,7 @@ export default function Dashboard({ session }) {
   }, [profile]); // Added profile to dependency array for the subscription
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
   };
 
   const submitWork = async (e) => {
@@ -223,7 +223,7 @@ export default function Dashboard({ session }) {
 
   return (
     <div className="h-full">
-      <header className="bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-lg">
+      <header className="bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-lg border border-red-500/20 a">
         {/* --- CHANGE (Layout) --- */}
         <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
