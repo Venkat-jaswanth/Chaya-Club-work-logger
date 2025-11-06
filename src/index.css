@@ -33,7 +33,7 @@ body,
 /* Themed react-datepicker (cyber) */
 /* ✅ CYBER CALENDAR OVERRIDE */
 .cyber-popper {
-  z-index: 999999 !important;
+  z-index: 999999999 !important;
 }
 
 /* ✅ POPUP CALENDAR ONLY — does NOT affect input */

@@ -321,6 +321,9 @@ focus:border-red-500 focus:ring-2 focus:ring-red-500"
                   onChange={(date) =>
                     setLogDate(date.toISOString().slice(0, 10))
                   }
+                  popperPlacement={
+                    window.innerWidth < 640 ? "top-start" : "right-start"
+                  }
                   dateFormat="yyyy-MM-dd"
                   maxDate={new Date()}
                   showPopperArrow={false}
