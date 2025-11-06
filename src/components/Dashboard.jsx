@@ -258,7 +258,7 @@ export default function Dashboard({ session }) {
       </header>
 
       {/* --- CHANGE (Layout) --- */}
-      <main className="mx-auto max-w-6xl py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-6xl px-2 py-8 sm:px-6 lg:px-8">
         {/* Work Log Form */}
         <div
           className="rounded-2xl bg-[#0D1321]/90 backdrop-blur-xl p-4 sm:p-6 
