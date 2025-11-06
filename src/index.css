@@ -1,68 +1,133 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Global polish to complement Tailwind classes */
+::selection {
+  background: rgba(139, 92, 246, 0.25);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+/* Subtle scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.5) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(139, 92, 246, 0.7),
+    rgba(6, 182, 212, 0.7)
+  );
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Themed react-datepicker (cyber) */
+/* ✅ CYBER CALENDAR OVERRIDE */
+.cyber-popper {
+  z-index: 999999 !important;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* ✅ POPUP CALENDAR ONLY — does NOT affect input */
+.cyber-calendar.react-datepicker {
+  background: #0D1321 !important;
+  border: 2px solid #ff1a1a55 !important;
+  border-radius: 12px !important;
+  color: white !important;
+  box-shadow: 0 0 20px #ff1a1a55 !important;
+  padding: 6px !important;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Header */
+.cyber-calendar .react-datepicker__header {
+  background: #1A2333 !important;
+  border-bottom: 1px solid #ff1a1a33 !important;
+  color: white !important;
+}
+
+/* Day styling */
+.cyber-calendar .react-datepicker__day {
+  color: #d3b5b5 !important;
+  border-radius: 6px !important;
+}
+
+.cyber-calendar .react-datepicker__day:hover {
+  background: #ff1a1a55 !important;
+  box-shadow: 0 0 6px #ff1a1a99;
+}
+
+.cyber-calendar .react-datepicker__day--selected {
+  background: #ff1a1a !important;
+  box-shadow: 0 0 10px #ff1a1a;
+  color: white !important;
+}
+
+.cyber-calendar .react-datepicker__day--today {
+  border: 1px solid #ff1a1a99 !important;
+}
+/* ✅ Month Title */
+.cyber-calendar .react-datepicker__current-month {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 6px #ff1a1a88;
+}
+
+/* ✅ Navigation Arrows */
+.cyber-calendar .react-datepicker__navigation-icon::before {
+  border-color: #ff1a1a !important;
+  box-shadow: 0 0 6px #ff1a1a99;
+}
+
+.cyber-calendar .react-datepicker__navigation:hover * {
+  filter: drop-shadow(0 0 6px #ff1a1a);
+}
+
+/* ✅ Weekday Names (Su, Mo, Tu...) */
+.cyber-calendar .react-datepicker__day-name {
+  color: #ffb3b3 !important;
+  font-weight: 600;
+  text-shadow: 0 0 6px #ff1a1a55;
+}
+
+
+/* ✅ Properly center navigation arrows */
+.cyber-calendar .react-datepicker__navigation {
+  top: 12px !important; /* vertically align buttons */
+  line-height: 1 !important;
+  border: none !important;
+}
+
+.cyber-calendar .react-datepicker__navigation-icon::before {
+  width: 8px !important;
+  height: 8px !important;
+  border-width: 2px 2px 0 0 !important;
+  margin-top: -2px !important; /* vertical centering fix */
+}
+
+/* ✅ Better clickable area */
+.cyber-calendar .react-datepicker__navigation--previous {
+  left: 16px !important;
+}
+
+.cyber-calendar .react-datepicker__navigation--next {
+  right: 16px !important;
+}
+
+
+@media (max-width: 640px) {
+  .swipe-delete {
+    transition: transform 0.25s ease-out;
+    touch-action: pan-y;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  .swipe-delete.swiped {
+    transform: translateX(-80px); /* slide left to reveal icon */
   }
 }

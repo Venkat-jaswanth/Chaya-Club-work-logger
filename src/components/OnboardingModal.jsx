@@ -1,54 +1,81 @@
-import React, { useState } from 'react'
-import { supabase } from '../supabaseClient'
+import React, { useState } from "react";
+import { supabase } from "../supabaseClient";
+import logo from "../../chaya_logo.png"; // ✅ Nice branding
 
 export default function OnboardingModal({ user, onDone }) {
-  const [studyYear, setStudyYear] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [err, setErr] = useState('')
+  const [studyYear, setStudyYear] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
 
   const saveProfile = async (e) => {
-    e.preventDefault()
-    setErr('')
-    setSaving(true)
-    const fullName = user.user_metadata?.full_name
-    const email = user.email
+    e.preventDefault();
+    setErr("");
+    setSaving(true);
+
+    const fullName = user.user_metadata?.full_name;
+    const email = user.email;
+
     const { data, error } = await supabase
-      .from('profiles')
+      .from("profiles")
       .upsert({
         id: user.id,
         full_name: fullName,
         email,
-        study_year: parseInt(studyYear, 10)
+        study_year: parseInt(studyYear, 10),
       })
       .select()
-      .single()
+      .single();
 
-    setSaving(false)
-    if (error) {
-      setErr(error.message)
-      return
-    }
-    onDone(data)
-  }
+    setSaving(false);
+
+    if (error) return setErr(error.message);
+    onDone(data);
+  };
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-      <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h3 className="text-xl font-semibold text-gray-900">
-          Welcome, {user.user_metadata?.full_name || 'Friend'}!
+      {/* ✅ Dark blur background */}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" />
+
+      {/* ✅ Cyber Modal */}
+      <div className="fixed z-50 top-1/2 left-1/2 
+        -translate-x-1/2 -translate-y-1/2 
+        w-full max-w-md rounded-2xl 
+        bg-[#0D1321]/95 border border-red-500/30 
+        shadow-[0_0_25px_#ff1a1a55] p-6">
+
+        {/* ✅ Logo */}
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="Chaya" className="h-14 drop-shadow-[0_0_6px_#ff1a1a88]" />
+        </div>
+
+        {/* ✅ Title */}
+        <h3 className="text-2xl font-extrabold text-white text-center 
+          drop-shadow-[0_0_8px_#ff1a1a88] tracking-wide">
+          Welcome, {user.user_metadata?.full_name?.split(" ")[0] || "Friend"}!
         </h3>
-        <p className="mt-2 text-sm text-gray-600">
-          Please add your study year to continue. You’ll only do this once.
+
+        {/* ✅ Subtitle */}
+        <p className="mt-2 text-sm text-gray-300 text-center">
+          Choose your study year to continue<br/>
+          <span className="opacity-70 text-xs">You’ll do this only once ✅</span>
         </p>
+
+        {/* ✅ Form */}
         <form className="mt-6 space-y-4" onSubmit={saveProfile}>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Study Year</label>
+            <label className="block text-sm font-semibold text-gray-200 
+              mb-1 tracking-wide">
+              Study Year
+            </label>
+
             <select
               required
               value={studyYear}
               onChange={(e) => setStudyYear(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-lg bg-[#1A2333] border border-[#2B3A55]
+              text-white px-3 py-2 shadow-sm 
+              focus:border-red-500 focus:ring-2 focus:ring-red-500"
             >
               <option value="" disabled>Select your year</option>
               <option value="1">1</option><option value="2">2</option>
@@ -56,18 +83,33 @@ export default function OnboardingModal({ user, onDone }) {
               <option value="5">5 (M.Tech / Other)</option>
             </select>
           </div>
-          {err && <div className="text-sm text-red-600">{err}</div>}
-          <div className="mt-6 flex justify-end">
+
+          {/* ✅ Error Message */}
+          {err && (
+            <div className="text-sm text-red-500 
+              bg-red-500/10 border border-red-500/50 rounded-md p-2 text-center">
+              {err}
+            </div>
+          )}
+
+          {/* ✅ Save Button */}
+          <div className="mt-6 flex justify-center">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+              className="relative inline-flex items-center justify-center rounded-lg 
+              bg-gradient-to-r from-red-600 to-red-400 px-6 py-2 text-sm font-bold text-white 
+              shadow-[0_0_10px_#ff1a1a55] transition-all duration-300
+              hover:shadow-[0_0_15px_#ff1a1acc] hover:-translate-y-[2px]
+              active:translate-y-[1px] active:shadow-[0_0_6px_#ff1a1a99]
+              disabled:opacity-60 disabled:cursor-not-allowed
+              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              {saving ? 'Saving...' : 'Save Profile'}
+              {saving ? "Saving..." : "Save & Continue"}
             </button>
           </div>
         </form>
       </div>
     </>
-  )
+  );
 }
