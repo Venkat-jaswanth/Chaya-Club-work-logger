@@ -131,3 +131,9 @@ body,
     transform: translateX(-80px); /* slide left to reveal icon */
   }
 }
+@layer utilities {
+  .anywrap {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}

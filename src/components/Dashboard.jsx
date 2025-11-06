@@ -13,14 +13,9 @@ export default function Dashboard({ session }) {
   const [activeTab, setActiveTab] = useState("mine");
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  // Auto-dismiss the confirm delete modal after 5 seconds
-  useEffect(() => {
-    if (!confirmDelete) return;
-    const timer = setTimeout(() => {
-      setConfirmDelete(null);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [confirmDelete]);
+  // --- CHANGE (Suggestion 2) ---
+  // Removed the auto-dismissing useEffect for `confirmDelete`
+  // ---
 
   // Form state
   const [logDate, setLogDate] = useState(() =>
@@ -104,6 +99,8 @@ export default function Dashboard({ session }) {
     setMyLogs((data || []).map((d) => ({ ...d, me: true })));
   };
 
+  // --- CHANGE (Suggestion 1) ---
+  // Updated subscription to be more performant
   const subscribeLogs = () => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -112,15 +109,45 @@ export default function Dashboard({ session }) {
       .channel("public:work_logs")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "work_logs" },
-        () => {
+        { event: "INSERT", schema: "public", table: "work_logs" },
+        (payload) => {
+          const newLog = payload.new;
+
+          // 1. Optimistically update "My Logs" if it's the current user
+          if (newLog.user_id === user.id && profile) {
+            setMyLogs((prevLogs) => [
+              { ...newLog, me: true, profiles: profile }, // Add profile data from state
+              ...(prevLogs || []),
+            ]);
+          }
+
+          // 2. Refetch "Club Activity" since we don't have the profile
+          // for other users, and we want to ensure correct order.
           fetchRecentLogs();
-          fetchMyLogs();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "work_logs" },
+        (payload) => {
+          // payload.old contains the deleted record (or at least its ID)
+          const deletedLogId = payload.old.id;
+
+          // Optimistically remove from both lists
+          if (deletedLogId) {
+            setMyLogs((prev) =>
+              prev ? prev.filter((l) => l.id !== deletedLogId) : []
+            );
+            setRecentLogs((prev) =>
+              prev ? prev.filter((l) => l.id !== deletedLogId) : []
+            );
+          }
         }
       )
       .subscribe();
     channelRef.current = ch;
   };
+  // --- End of Change ---
 
   useEffect(() => {
     fetchProfile();
@@ -131,7 +158,7 @@ export default function Dashboard({ session }) {
       if (channelRef.current) supabase.removeChannel(channelRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [profile]); // Added profile to dependency array for the subscription
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -156,7 +183,7 @@ export default function Dashboard({ session }) {
     } else {
       setSubmitMsg({ text: "Work logged successfully!", error: false });
       setDescription("");
-      // logs update via realtime subscription
+      // logs update via realtime subscription, no refetch needed here
     }
   };
   const exportCSV = (logs) => {
@@ -187,6 +214,8 @@ export default function Dashboard({ session }) {
 
   const deleteLog = async (log) => {
     // Optimistically remove from local lists and delete immediately (no undo)
+    // This is good, but the realtime subscription will also catch it.
+    // To prevent a flicker, we'll leave this local removal.
     setMyLogs((prev) => prev.filter((l) => l.id !== log.id));
     setRecentLogs((prev) => prev.filter((l) => l.id !== log.id));
     await supabase.from("work_logs").delete().eq("id", log.id);
@@ -195,35 +224,44 @@ export default function Dashboard({ session }) {
   return (
     <div className="h-full">
       <header className="bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-lg">
-        <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        {/* --- CHANGE (Layout) --- */}
+        <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            {/* Logo row (centered on mobile) */}
+            <div className="flex justify-center sm:justify-start">
               <img
                 src={logo}
                 alt="Chaya Logo"
-                className="h-16 rounded-md p-2"
+                className="h-14 sm:h-16 rounded-md p-2"
               />
+            </div>
+
+            {/* Name + Logout on same row */}
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold leading-6">
+                <h1 className="text-xl sm:text-2xl font-bold leading-6">
                   Welcome{profile?.full_name ? `, ${profile.full_name}` : "!"}
                 </h1>
-                <p className="mt-1 text-sm text-white/80">{user.email}</p>
+                <p className="mt-1 text-xs sm:text-sm text-white/80">
+                  {user.email}
+                </p>
               </div>
+              <button
+                onClick={signOut}
+                className="rounded-md bg-white/15 px-3 py-2 text-sm font-medium text-white shadow-md ring-1 ring-white/20 transition hover:bg-white/25"
+              >
+                Logout
+              </button>
             </div>
-            <button
-              onClick={signOut}
-              className="rounded-md bg-white/15 px-3 py-2 text-sm font-medium text-white shadow-md ring-1 ring-white/20 transition hover:bg-white/25"
-            >
-              Logout
-            </button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl py-8 sm:px-6 lg:px-8">
+      {/* --- CHANGE (Layout) --- */}
+      <main className="mx-auto max-w-6xl py-8 sm:px-6 lg:px-8">
         {/* Work Log Form */}
         <div
-          className="rounded-2xl bg-[#0D1321]/90 backdrop-blur-xl p-6 
+          className="rounded-2xl bg-[#0D1321]/90 backdrop-blur-xl p-4 sm:p-6 
     shadow-[0_0_20px_#ff1a1a33] border border-red-500/20 text-white"
         >
           <h2
@@ -329,7 +367,7 @@ focus:border-red-500 focus:ring-2 focus:ring-red-500"
               <button
                 ref={submitBtnRef}
                 type="submit"
-                className="relative inline-flex items-center justify-center rounded-lg 
+                className="relative inline-flex items-center justify-center rounded-lg w-full sm:w-auto
                 bg-gradient-to-r from-red-600 to-red-400 px-6 py-2 text-sm font-bold text-white 
                 shadow-[0_0_10px_#ff1a1a55] transition-all duration-300
                 hover:shadow-[0_0_15px_#ff1a1acc] hover:-translate-y-[2px]
@@ -344,31 +382,37 @@ focus:border-red-500 focus:ring-2 focus:ring-red-500"
 
         {/* Logs Section with Tabs */}
         <div className="mt-12">
+          {/* --- CHANGE (Suggestion 3) --- */}
           <div className="flex gap-3 border-b border-red-500/30 pb-2 mb-4">
             <button
               onClick={() => setActiveTab("mine")}
+              role="tab"
+              aria-selected={activeTab === "mine"}
               className={`px-4 py-2 font-semibold transition 
-        ${
-          activeTab === "mine"
-            ? "text-white border-b-2 border-red-500 drop-shadow-[0_0_6px_#ff1a1a55]"
-            : "text-gray-400 hover:text-gray-200"
-        }`}
+      ${
+        activeTab === "mine"
+          ? "text-white border-b-2 border-red-500 drop-shadow-[0_0_6px_#ff1a1a55]"
+          : "text-gray-400 hover:text-gray-200"
+      }`}
             >
               Your Work
             </button>
 
             <button
               onClick={() => setActiveTab("recent")}
+              role="tab"
+              aria-selected={activeTab === "recent"}
               className={`px-4 py-2 font-semibold transition
-        ${
-          activeTab === "recent"
-            ? "text-white border-b-2 border-red-500 drop-shadow-[0_0_6px_#ff1a1a55]"
-            : "text-gray-400 hover:text-gray-200"
-        }`}
+      ${
+        activeTab === "recent"
+          ? "text-white border-b-2 border-red-500 drop-shadow-[0_0_6px_#ff1a1a55]"
+          : "text-gray-400 hover:text-gray-200"
+      }`}
             >
               Club Activity
             </button>
           </div>
+          {/* --- End of Change --- */}
 
           <div className="relative overflow-hidden">
             <div
