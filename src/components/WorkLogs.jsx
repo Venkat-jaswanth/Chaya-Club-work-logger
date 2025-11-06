@@ -1,7 +1,17 @@
 import React from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 
-export default function WorkLogs({ title, logs, isMine, setConfirmDelete }) {
+// --- MODIFIED (Suggestion) ---
+// Accept subclubMap as a prop
+export default function WorkLogs({
+  title,
+  logs,
+  isMine,
+  setConfirmDelete,
+  subclubMap = {}, // Default to empty object
+}) {
+  // --- End of Modify ---
+
   if (!logs)
     return (
       <p className="text-center text-gray-400 mt-6 animate-pulse">
@@ -44,6 +54,14 @@ export default function WorkLogs({ title, logs, isMine, setConfirmDelete }) {
                   )}
                 </div>
                 <div className="mt-2 h-px w-16 bg-red-500/60 shadow-[0_0_6px_#ff1a1a55]"></div>
+                
+                {/* --- NEW (Suggestion) --- */}
+                {/* Added Subclub display for mobile */}
+                <div className="mt-1.5 text-xs font-medium text-red-300/90">
+                  {subclubMap[log.subclub] || log.subclub || "N/A"}
+                </div>
+                {/* --- End of New --- */}
+
                 <div className="mt-0.5 text-xs text-gray-300">
                   Year {log.profiles?.study_year || "-"}
                 </div>
@@ -73,12 +91,16 @@ export default function WorkLogs({ title, logs, isMine, setConfirmDelete }) {
       {/* Desktop table */}
       <table className="hidden sm:table min-w-full text-left table-fixed">
         <thead className="bg-[#1A2333]/90 uppercase text-[11px] text-gray-300 tracking-wider">
+          {/* --- MODIFIED (Suggestion) --- */}
+          {/* Added Subclub <th> and adjusted widths */}
           <tr>
             <th className="px-4 py-3 w-[25%]">Name</th>
-            <th className="px-4 py-3 w-[12%] text-center">Year</th>
-            <th className="px-4 py-3 w-[18%] whitespace-nowrap">Date</th>
-            <th className="px-4 py-3 w-[45%]">Work Done</th>
+            <th className="px-4 py-3 w-[10%] text-center">Year</th>
+            <th className="px-4 py-3 w-[20%]">Subclub</th>
+            <th className="px-4 py-3 w-[15%] whitespace-nowrap">Date</th>
+            <th className="px-4 py-3 w-[30%]">Work Done</th>
           </tr>
+          {/* --- End of Modify --- */}
         </thead>
 
         <tbody className="text-sm text-gray-200 align-top">
@@ -86,7 +108,6 @@ export default function WorkLogs({ title, logs, isMine, setConfirmDelete }) {
             <tr
               key={log.id}
               className="border-b border-[#2B3A55] hover:bg-[#1A2333]/60 transition group"
-              // Removed onTouchStart and onTouchMove props from here
             >
               {/* Name */}
               <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-100">
@@ -103,6 +124,13 @@ export default function WorkLogs({ title, logs, isMine, setConfirmDelete }) {
               <td className="px-4 py-3 text-center text-gray-300">
                 {log.profiles?.study_year || "-"}
               </td>
+
+              {/* --- NEW (Suggestion) --- */}
+              {/* Added Subclub <td> */}
+              <td className="px-4 py-3 text-gray-300 whitespace-nowrap">
+                {subclubMap[log.subclub] || log.subclub || "N/A"}
+              </td>
+              {/* --- End of New --- */}
 
               {/* Date */}
               <td className="px-4 py-3 whitespace-nowrap text-gray-300">
